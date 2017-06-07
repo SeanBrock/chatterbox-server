@@ -12,6 +12,66 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 
+var fs = require('fs');
+
+// These headers will allow Cross-Origin Resource Sharing (CORS).
+// This code allows this server to talk to websites that
+// are on different domains, for instance, your chat client.
+//
+// Your chat client is running from a url like file://your/chat/client/index.html,
+// which is considered a different domain.
+//
+// Another way to get around this restriction is to serve you chat
+// client from this domain by setting up static file serving.
+var defaultCorsHeaders = {
+  'access-control-allow-origin': '*',
+  'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'access-control-allow-headers': 'content-type, accept',
+  'access-control-max-age': 10 // Seconds.
+};
+
+var getFavicon = function (request, response) {
+  fs.readFile('./favicon.ico', (err, data) => {
+    if (err) { throw err; }
+    response.writeHead(200, {'Content-Type': 'image/x-icon'});
+    response.end(data, 'text/plain');
+  });
+
+};
+
+var getMessages = function(request, response) {
+  var boringMessageReturn = {
+    results: [
+      {
+        text: 'test1',
+        roomname: '4chan',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        username: 'davelel'
+      },
+      {
+        text: 'test2',
+        roomname: '4chan',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        username: 'davelel'
+      }
+    ]
+  };
+
+  response.writeHead(200, {'Content-Type': 'application/json'});
+  response.end(JSON.stringify(boringMessageReturn));
+};
+//define r
+var routes = {
+  'GET': {
+    '/favicon.ico': getFavicon,
+    '/classes/messages': getMessages
+  },
+  'POST': {
+
+  }
+};
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
   //
@@ -28,6 +88,9 @@ var requestHandler = function(request, response) {
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
+  if (routes.hasOwnProperty(request.method) && routes[request.method].hasOwnProperty(request.url)) {
+    routes[request.method][request.url](request, response);
+  }
 
   // The outgoing status.
   var statusCode = 200;
@@ -55,19 +118,7 @@ var requestHandler = function(request, response) {
   response.end('Hello, World!');
 };
 
-// These headers will allow Cross-Origin Resource Sharing (CORS).
-// This code allows this server to talk to websites that
-// are on different domains, for instance, your chat client.
-//
-// Your chat client is running from a url like file://your/chat/client/index.html,
-// which is considered a different domain.
-//
-// Another way to get around this restriction is to serve you chat
-// client from this domain by setting up static file serving.
-var defaultCorsHeaders = {
-  'access-control-allow-origin': '*',
-  'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'access-control-allow-headers': 'content-type, accept',
-  'access-control-max-age': 10 // Seconds.
-};
+
+
+module.exports.requestHandler = requestHandler;
 
