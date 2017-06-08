@@ -66,7 +66,7 @@ var getMessages = function(request, response) {
 };
 
 var postMessages = function(request, response) {
-  var body = "";
+  var body = '';
   request.on('data', function (chunk) {
     body += chunk;
   });
@@ -125,7 +125,7 @@ var requestHandler = function(request, response) {
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
-  console.log('request headers: ',request.headers);
+  console.log('request headers: ', request.headers);
   if (routes.hasOwnProperty(request.method) && routes[request.method].hasOwnProperty(request.url)) {
     routes[request.method][request.url](request, response);
   } else {
