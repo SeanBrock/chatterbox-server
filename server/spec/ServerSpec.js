@@ -56,7 +56,7 @@ describe('Node Server Request Listener Function', function() {
     expect(res._ended).to.equal(true);
   });
 
-  it('Should accept posts to /classes/room', function() {
+  it('Should return response code 201 for a POST request to the messages endpoint', function() {
     var stubMsg = {
       username: 'Jono',
       message: 'Do my bidding!'
@@ -69,9 +69,6 @@ describe('Node Server Request Listener Function', function() {
     // Expect 201 Created response status
     expect(res._responseCode).to.equal(201);
 
-    // Testing for a newline isn't a valid test
-    // TODO: Replace with with a valid test
-    // expect(res._data).to.equal(JSON.stringify('\n'));
     expect(res._ended).to.equal(true);
   });
 
@@ -101,6 +98,72 @@ describe('Node Server Request Listener Function', function() {
     expect(res._ended).to.equal(true);
   });
 
+  it('Should appropriately store and access message data', function() {
+    var stubMsg = {
+      username: 'Jono',
+      message: 'Do my bidding!'
+    };
+    var req = new stubs.request('/classes/messages', 'POST', stubMsg);
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(201);
+
+    var stubMsg = {
+      username: 'Not Jono',
+      message: 'Do my bidding even harder!'
+    };
+    req = new stubs.request('/classes/messages', 'POST', stubMsg);
+    res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(201);
+
+    // Now if we request the log for that room the message we posted should be there:
+    req = new stubs.request('/classes/messages', 'GET');
+    res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(200);
+    var messages = JSON.parse(res._data).results;
+    expect(messages.length).to.equal(4);
+    expect(messages[3].username).to.equal('Not Jono');
+    expect(messages[3].message).to.equal('Do my bidding even harder!');
+    expect(res._ended).to.equal(true);
+  });
+
+  it('Should return response code 400 for a POST request without a username provided', function() {
+    var stubMsg = {
+      message: 'Do my bidding!'
+    };
+    var req = new stubs.request('/classes/messages', 'POST', stubMsg);
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    // Expect 201 Created response status
+    expect(res._responseCode).to.equal(400);
+
+    expect(res._ended).to.equal(true);
+  });
+
+  it('Should return response code 400 for a POST request without a message provided', function() {
+    var stubMsg = {
+      username: 'Jono'
+    };
+    var req = new stubs.request('/classes/messages', 'POST', stubMsg);
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    // Expect 201 Created response status
+    expect(res._responseCode).to.equal(400);
+
+    expect(res._ended).to.equal(true);
+  });
 
   it('Should 404 when asked for a nonexistent file', function() {
     var req = new stubs.request('/arglebargle', 'GET');

@@ -73,11 +73,9 @@ var postMessages = function(request, response) {
   request.on('end', function () {
     //console.log('request ended',body);
     var messageToAdd = {
-      text: '',
       roomname: '',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      username: ''
     };
     var parsedInputMessage = JSON.parse(body);
     var parsedKeys = Object.keys(parsedInputMessage);
@@ -85,11 +83,17 @@ var postMessages = function(request, response) {
       messageToAdd[parsedKeys[i]] = parsedInputMessage[parsedKeys[i]];
     }
 
-
-    messages.push(messageToAdd);
-    response.writeHead(201, {'Content-Type': 'application/json'});
-    response.end(JSON.stringify(messageToAdd));
-    //response.end('');
+    if (!messageToAdd.hasOwnProperty('message')) {
+      response.writeHead(400, {'Content-Type': 'application/json'});
+      response.end(JSON.stringify({error: 'Missing "message" key from post request.'}));
+    } else if (!messageToAdd.hasOwnProperty('username')) {
+      response.writeHead(400, {'Content-Type': 'application/json'});
+      response.end(JSON.stringify({error: 'Missing "username" key from post request.'}));
+    } else {
+      messages.push(messageToAdd);
+      response.writeHead(201, {'Content-Type': 'application/json'});
+      response.end(JSON.stringify(messageToAdd));
+    }
   });
 
 };
