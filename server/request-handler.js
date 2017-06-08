@@ -13,6 +13,7 @@ this file and include it in basic-server.js so that it actually works.
 **************************************************************/
 
 var fs = require('fs');
+var messages = [];
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
 // This code allows this server to talk to websites that
@@ -60,8 +61,40 @@ var getMessages = function(request, response) {
   };
 
   response.writeHead(200, {'Content-Type': 'application/json'});
-  response.end(JSON.stringify(boringMessageReturn));
+  //response.end(JSON.stringify(boringMessageReturn));
+  response.end(JSON.stringify({results: messages}));
 };
+
+var postMessages = function(request, response) {
+  var body = "";
+  request.on('data', function (chunk) {
+    body += chunk;
+  });
+  request.on('end', function () {
+    //console.log('request ended',body);
+    var messageToAdd = {
+      text: '',
+      roomname: '',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      username: ''
+    };
+    var parsedInputMessage = JSON.parse(body);
+    var parsedKeys = Object.keys(parsedInputMessage);
+    for (var i = 0; i < parsedKeys.length; i++) {
+      messageToAdd[parsedKeys[i]] = parsedInputMessage[parsedKeys[i]];
+    }
+
+
+    messages.push(messageToAdd);
+    response.writeHead(201, {'Content-Type': 'application/json'});
+    response.end(JSON.stringify(messageToAdd));
+    //response.end('');
+  });
+
+};
+
+
 //define r
 var routes = {
   'GET': {
@@ -69,7 +102,7 @@ var routes = {
     '/classes/messages': getMessages
   },
   'POST': {
-
+    '/classes/messages': postMessages
   }
 };
 var requestHandler = function(request, response) {
@@ -88,10 +121,14 @@ var requestHandler = function(request, response) {
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
+  console.log('request headers: ',request.headers);
   if (routes.hasOwnProperty(request.method) && routes[request.method].hasOwnProperty(request.url)) {
     routes[request.method][request.url](request, response);
+  } else {
+    response.writeHead(404);
+    response.end('No route available');
   }
-
+  /*
   // The outgoing status.
   var statusCode = 200;
 
@@ -116,6 +153,7 @@ var requestHandler = function(request, response) {
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
   response.end('Hello, World!');
+  */
 };
 
 
