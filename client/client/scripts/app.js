@@ -3,7 +3,8 @@ var app = {
 
   //TODO: The current 'handleUsernameClick' function just toggles the class 'friend'
   //to all messages sent by the user
-  server: 'http://parse.hrr.hackreactor.com/chatterbox/classes/messages',
+  //server: 'http://parse.hrr.hackreactor.com/chatterbox/classes/messages',
+  server: 'http://127.0.0.1:3000/classes/messages',
   username: 'anonymous',
   roomname: 'lobby',
   lastMessageId: 0,
@@ -39,11 +40,13 @@ var app = {
     app.startSpinner();
 
     // POST the message to the server
+    //console.log('sending message: ', message, JSON.stringify(message));
     $.ajax({
       url: app.server,
       type: 'POST',
       data: message,
       success: function (data) {
+        //console.log('success call');
         // Clear messages input
         app.$message.val('');
 
@@ -57,12 +60,14 @@ var app = {
   },
 
   fetch: function(animate) {
+    //console.log('start of fetch call');
     $.ajax({
       url: app.server,
       type: 'GET',
       data: { order: '-createdAt' },
       contentType: 'application/json',
       success: function(data) {
+        //console.log('fetch success: ',data);
         // Don't bother if we have nothing to work with
         if (!data.results || !data.results.length) { return; }
 
