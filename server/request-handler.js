@@ -73,16 +73,23 @@ var postMessages = function(request, response) {
       updatedAt: new Date().toISOString(),
     };
     //console.log('body of request: ' + JSON.stringify(queryString.parse(body)));
-    var parsedInputMessage = queryString.parse(body);
+    if (body[0] !== '{') {
+      var parsedInputMessage = queryString.parse(body);
+    } else {
+      var parsedInputMessage = JSON.parse(body);
+    }
+
     var parsedKeys = Object.keys(parsedInputMessage);
     for (var i = 0; i < parsedKeys.length; i++) {
       messageToAdd[parsedKeys[i]] = parsedInputMessage[parsedKeys[i]];
     }
     messageToAdd.objectId = messages.length;
     if (!messageToAdd.hasOwnProperty('text')) {
+      console.log('no text in post request', JSON.stringify(messageToAdd));
       response.writeHead(400, headers);
       response.end(JSON.stringify({error: 'Missing "message" key from post request.'}));
     } else if (!messageToAdd.hasOwnProperty('username')) {
+      console.log('no username in post request', JSON.stringify(messageToAdd));
       response.writeHead(400, headers);
       response.end(JSON.stringify({error: 'Missing "username" key from post request.'}));
     } else {

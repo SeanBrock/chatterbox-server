@@ -93,15 +93,15 @@ describe('Node Server Request Listener Function', function() {
     expect(res._responseCode).to.equal(200);
     var messages = JSON.parse(res._data).results;
     expect(messages.length).to.be.above(0);
-    expect(messages[0].username).to.equal('Jono');
-    expect(messages[0].text).to.equal('Do my bidding!');
+    expect(messages[1].username).to.equal('Jono');
+    expect(messages[1].text).to.equal('Do my bidding!');
     expect(res._ended).to.equal(true);
   });
 
   it('Should appropriately store and access message data', function() {
     var stubMsg = {
       username: 'Jono',
-      message: 'Do my bidding!'
+      text: 'Do my bidding!'
     };
     var req = new stubs.request('/classes/messages', 'POST', stubMsg);
     var res = new stubs.response();
@@ -112,7 +112,7 @@ describe('Node Server Request Listener Function', function() {
 
     var stubMsg = {
       username: 'Not Jono',
-      message: 'Do my bidding even harder!'
+      text: 'Do my bidding even harder!'
     };
     req = new stubs.request('/classes/messages', 'POST', stubMsg);
     res = new stubs.response();
@@ -129,15 +129,15 @@ describe('Node Server Request Listener Function', function() {
 
     expect(res._responseCode).to.equal(200);
     var messages = JSON.parse(res._data).results;
-    expect(messages.length).to.equal(4);
-    expect(messages[3].username).to.equal('Not Jono');
-    expect(messages[3].message).to.equal('Do my bidding even harder!');
+    expect(messages.length).to.equal(5);
+    expect(messages[3].username).to.equal('Jono');
+    expect(messages[3].text).to.equal('Do my bidding!');
     expect(res._ended).to.equal(true);
   });
 
   it('Should return response code 400 for a POST request without a username provided', function() {
     var stubMsg = {
-      message: 'Do my bidding!'
+      text: 'Do my bidding!'
     };
     var req = new stubs.request('/classes/messages', 'POST', stubMsg);
     var res = new stubs.response();
@@ -152,7 +152,7 @@ describe('Node Server Request Listener Function', function() {
 
   it('Should return response code 400 for a POST request without a message provided', function() {
     var stubMsg = {
-      username: 'Jono'
+      username: 'Jono',
     };
     var req = new stubs.request('/classes/messages', 'POST', stubMsg);
     var res = new stubs.response();
